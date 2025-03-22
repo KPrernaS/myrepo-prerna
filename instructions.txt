@@ -1,0 +1,82 @@
+•	Adjustment 
+•	AU Transfer
+•	Closing Notice
+o	Reallocation Fees
+o	Amendment Fees
+o	Reallocation Principal
+•	Commitment Change
+o	Cashless Roll
+o	Decrease
+o	Increase
+•	Fee Payment
+o	Ongoing Fee
+o	Letter of Credit Fee
+•	Money Movement – Inbound
+o	Principal
+o	Interest
+o	Principal + Interest
+o	Principal + Interest + Fee
+•	Money Movement – Outbound
+o	Timebound
+o	Foreign Currency
+
+
+
+
+This document, dated November 8, 2023, is from Bank of America, N.A. to Wells Fargo Bank National Association, regarding a loan repayment by FITZGERALD LP under the SOFR (US) Term option. Key details include:
+Borrower and Loan Details:
+FITZGERALD LP elected to repay USD 20,000,000.00.
+The loan, effective July 20, 2023, is scheduled to reprice on November 20, 2023.
+Deal CUSIP: 13861EAE0, Deal ISIN: US13861EAE05.
+Facility CUSIP: 13861EAF7, Facility ISIN: US13861EAF79.
+Principal Balances:
+Previous Global principal balance: USD 45,000,000.00.
+New Global principal balance: USD 25,000,000.00.
+Share of the SOFR (US) Term option payment: USD 1,411,764.71.
+Previous Lender Share Principal Balance: USD 3,176,470.59.
+New Lender Share Principal Balance: USD 1,764,705.88.
+Payment Information:
+Bank of America will remit USD 1,411,764.71 on the effective date.
+Conditions apply for the return of the payment if not made by the borrower, in excess, or erroneously made.
+Bank Details for Wells Fargo:
+ABA Number: 12
+Account No: XXXXXXXXXX0720.
+Reference: CANTOR FITZGERALD LP USD 425MM MAR22, SOFR (US) Term Principal Payment (CANTOR FIT00037).
+Contact Information:
+Jonny Hernandez, with contact details provided for telephone and email.
+
+
+📂 email-classification
+ ┣ 📜 app.py                   # FastAPI backend
+ ┣ 📜 train_model.py            # DistilBERT training script
+ ┣ 📜 config.py                 # Configuration file (MongoDB settings)
+ ┣ 📜 requirements.txt          # Python dependencies
+ ┣ 📂 model                     # Trained DistilBERT model (to be saved here)
+ ┣ 📂 data                      # Sample dataset (emails for training)
+ ┣ 📜 README.md                 # Setup & usage instructions
+
+cd email-classification
+pip install -r requirements.txt
+
+Start MongoDB
+mongod --dbpath ./data
+8. Run the FastAPI Server
+
+uvicorn app:app –reload
+
+Server running at: http://127.0.0.1:8000
+
+Test API Locally
+curl -X 'POST' 'http://127.0.0.1:8000/batch-classify/' \
+     -H 'Content-Type: application/json' \
+     -d '{
+          "emails": ["We received an inbound payment of $10,000.", "Process fee payment."]
+         }'
+
+
+
+✅ Test in Browser (Swagger UI)
+Open:
+🔗 http://127.0.0.1:8000/docs
+📌 You can send test requests directly from Swagger UI.
+
