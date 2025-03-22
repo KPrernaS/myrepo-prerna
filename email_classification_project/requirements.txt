@@ -1,8 +1,0 @@
-
-flask
-pyyaml
-spacy
-openai
-pdfminer.six
-python-docx
-pymongo

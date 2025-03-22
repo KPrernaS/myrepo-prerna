@@ -1,7 +1,0 @@
-
-Flask
-pymongo
-openai
-python-docx
-pdfminer.six
-werkzeug

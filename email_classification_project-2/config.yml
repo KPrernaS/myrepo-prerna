@@ -1,8 +1,0 @@
-
-request_types:
-  Money Movement – Inbound:
-    required_info: ["Transaction date", "Amount", "Sender details"]
-  Money Movement – Outbound:
-    required_info: ["Transaction date", "Amount", "Receiver details"]
-  Adjustment:
-    required_info: ["Adjustment amount", "Reference ID"]
