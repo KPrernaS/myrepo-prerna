@@ -1,0 +1,13 @@
+{
+  "Fee Payment": {
+    "Ongoing Fee": [
+      "fee_amount",
+      "due_date"
+    ]
+  },
+  "Money Movement \u2013 Inbound": {
+    "Principal": [
+      "principal"
+    ]
+  }
+}

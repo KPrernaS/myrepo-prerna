@@ -1,0 +1,3 @@
+email_text,request_types,sub_request_types
+"Please process the ongoing fee payment of $25,000 due by 31 March.",Fee Payment,Ongoing Fee
+"Transfer $100,000 as principal inbound.",Money Movement – Inbound,Principal
