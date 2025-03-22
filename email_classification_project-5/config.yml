@@ -1,8 +1,0 @@
-
-request_types:
-  Money Movement – Inbound: ["Principal", "Interest"]
-  Money Movement – Outbound: ["Fees", "Transfers"]
-  Adjustment: []
-priority_request_types:
-  - Money Movement – Inbound
-  - Money Movement – Outbound

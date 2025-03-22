@@ -1,8 +1,0 @@
-
-flask
-pyyaml
-torch
-transformers
-datasets
-pymongo
-werkzeug
