@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flasgger import Swagger, swag_from
 from concurrent.futures import ThreadPoolExecutor
 import logging
 from config_manager import ConfigManager
@@ -12,6 +13,15 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+
+# Configure Swagger
+app.config['SWAGGER'] = {
+    'title': 'Email Classifier API',
+    'uiversion': 3,
+    'description': 'API for classifying email content and attachments',
+    'version': '1.0.0'
+}
+swagger = Swagger(app)
 
 # Initialize components
 config = ConfigManager()
@@ -56,7 +66,49 @@ def process_file(file):
         logger.error(f"Error processing file: {e}")
         raise
 
-@app.route("/classify", methods=["POST"])
+
+@app.route('/classify', methods=['POST'])
+@swag_from({
+    'tags': ['Classification'],
+    'description': 'Classify a single file (PDF, DOCX, EML, or plain text)',
+    'consumes': ['multipart/form-data'],
+    'parameters': [
+        {
+            'name': 'file',
+            'in': 'formData',
+            'type': 'file',
+            'required': True,
+            'description': 'File to classify (PDF, DOCX, EML, or plain text)'
+        }
+    ],
+    'responses': {
+        200: {
+            'description': 'Successful classification',
+            'examples': {
+                'application/json': [
+                    {
+                        "Request Type": "Money Movement – Outbound",
+                        "Sub Request Type": "Timebound",
+                        "Confidence Score": 0.95,
+                        "Decision Words": "process payment, Account #12345",
+                        "Required Info": {
+                            "date": "7 November 2023",
+                            "account_number": "Account #12345"
+                        },
+                        "Duplicate Flag": False,
+                        "Priority Flag": "High"
+                    }
+                ]
+            }
+        },
+        400: {
+            'description': 'Bad request (missing file or invalid file type)'
+        },
+        500: {
+            'description': 'Internal server error'
+        }
+    }
+})
 def classify():
     if "file" not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
@@ -69,7 +121,64 @@ def classify():
     except Exception as e:
         return jsonify({"error": "Internal server error"}), 500
 
-@app.route("/bulk_classify", methods=["POST"])
+@app.route('/bulk_classify', methods=['POST'])
+@swag_from({
+    'tags': ['Classification'],
+    'description': 'Classify multiple files in bulk',
+    'consumes': ['multipart/form-data'],
+    'parameters': [
+         {
+            'name': 'files',
+            'in': 'formData',
+            'type': 'array',
+            'items': {
+                'type': 'file',
+                'description': 'File to upload'
+            },
+            'required': True,
+            'description': 'List of files to classify'
+        }
+    ],
+    'responses': {
+        200: {
+            'description': 'Successful classification of all files',
+            'examples': {
+                'application/json': [
+                    [
+                        {
+                            "Request Type": "Account Maintenance",
+                            "Sub Request Type": "Update Details",
+                            "Confidence Score": 0.85,
+                            "Decision Words": "change address, update contact",
+                            "Required Info": {
+                                "new_address": "123 Main St"
+                            },
+                            "Duplicate Flag": False,
+                            "Priority Flag": "Medium"
+                        }
+                    ],
+                    [
+                        {
+                            "Request Type": "Duplicate",
+                            "Sub Request Type": "Duplicate",
+                            "Confidence Score": 1.0,
+                            "Decision Words": "",
+                            "Required Info": {},
+                            "Duplicate Flag": True,
+                            "Priority Flag": "Low"
+                        }
+                    ]
+                ]
+            }
+        },
+        400: {
+            'description': 'Bad request (missing files)'
+        },
+        500: {
+            'description': 'Internal server error'
+        }
+    }
+})
 def bulk_classify():
     if "files" not in request.files:
         return jsonify({"error": "No files uploaded"}), 400
@@ -89,7 +198,49 @@ def bulk_classify():
 
     return jsonify(results)
 
-@app.route("/update_config", methods=["POST"])
+@app.route('/update_config', methods=['POST'])
+@swag_from({
+    'tags': ['Configuration'],
+    'description': 'Update the classification configuration',
+    'consumes': ['application/json'],
+    'parameters': [
+        {
+            'name': 'body',
+            'in': 'body',
+            'required': True,
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'request_types': {
+                        'type': 'object',
+                        'description': 'Hierarchy of request types and sub-types',
+                        'example': {
+                            "Money Movement – Outbound": ["Timebound", "Recurring"],
+                            "Account Maintenance": ["Update Details", "Close Account"]
+                        }
+                    }
+                },
+                'required': ['request_types']
+            }
+        }
+    ],
+    'responses': {
+        200: {
+            'description': 'Configuration updated successfully',
+            'examples': {
+                'application/json': {
+                    "message": "Configuration updated successfully"
+                }
+            }
+        },
+        400: {
+            'description': 'Bad request (invalid configuration)'
+        },
+        500: {
+            'description': 'Internal server error'
+        }
+    }
+})
 def update_config():
     try:
         new_config = request.json
@@ -100,6 +251,37 @@ def update_config():
         return jsonify({"message": "Configuration updated successfully"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route('/')
+def index():
+    return """
+    <h1>Email Classifier API</h1>
+    <p>Visit <a href="/apidocs">/apidocs</a> for Swagger documentation</p>
+    """
+# Add this Swagger definition at the app level (not inside a route)
+app.config['SWAGGER']['template'] = {
+    'swagger': '2.0',
+    'info': {
+        'title': 'Email Classifier API',
+        'description': 'API for classifying email content and attachments',
+        'version': '1.0.0'
+    },
+    'definitions': {
+        'ClassificationResult': {
+            'type': 'object',
+            'properties': {
+                'Request Type': {'type': 'string'},
+                'Sub Request Type': {'type': 'string'},
+                'Confidence Score': {'type': 'number', 'format': 'float'},
+                'Decision Words': {'type': 'string'},
+                'Required Info': {'type': 'object'},
+                'Duplicate Flag': {'type': 'boolean'},
+                'Priority Flag': {'type': 'string', 'enum': ['Low', 'Medium', 'High']}
+            }
+        }
+    }
+}
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=7100, debug=True)
