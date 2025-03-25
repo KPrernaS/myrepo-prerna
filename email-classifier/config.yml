@@ -1,0 +1,22 @@
+request_types:
+  AU Transfer: []
+  Adjustment: []
+  Closing Notice:
+  - Reallocation Fees
+  - Amendment Fees
+  - Reallocation Principal
+  Commitment Change:
+  - Cashless Roll
+  - Decrease
+  - Increase
+  Fee Payment:
+  - Ongoing Fee
+  - Letter of Credit Fee
+  "Money Movement \u2013 Inbound":
+  - Principal
+  - Interest
+  - Principal + Interest
+  - Principal + Interest + Fee
+  "Money Movement \u2013 Outbound":
+  - Timebound
+  - Foreign Currency
