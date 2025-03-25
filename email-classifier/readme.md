@@ -165,6 +165,4 @@ CMD ["gunicorn", "--bind", "0.0.0.0:7100", "app:app"]
 - **MongoDB connection issues:** Verify MongoDB is running and the connection string is correct.
 - **File processing errors:** Check file types and sizes (large files may need special handling).
 
-## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
