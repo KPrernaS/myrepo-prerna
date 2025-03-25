@@ -13,6 +13,8 @@ from werkzeug.utils import secure_filename
 import logging
 import yaml
 from concurrent.futures import ThreadPoolExecutor
+from email import message_from_bytes
+from email.policy import default
 
 # Load configuration from YAML file
 CONFIG_FILE = "path_to_config/config.yml"  # Path to the config file
@@ -29,14 +31,11 @@ print("Loaded config:", config)
 if not config or "request_types" not in config:
     raise ValueError("Invalid config file: 'request_types' key is missing or empty.")
 
-
-
 # Extract request types and sub-request types from the config
 REQUEST_TYPES = config["request_types"]
 
 # Set your OpenAI API key
 openai.api_key = "OPEN_API_KEY"
-
 
 # MongoDB connection
 try:
@@ -98,6 +97,29 @@ def extract_text_from_pdf(file):
         return extract_text(file)
     except Exception as e:
         logger.error("Failed to extract text from PDF: %s", e)
+        raise
+
+# Function to extract text from EML files
+def extract_text_from_eml(file):
+    try:
+        # Read the file content
+        eml_content = file.read()
+        # Parse the EML file
+        msg = message_from_bytes(eml_content, policy=default)
+        
+        # Extract text from the email
+        text = ""
+        if msg.is_multipart():
+            for part in msg.walk():
+                content_type = part.get_content_type()
+                if content_type == "text/plain":
+                    text += part.get_payload(decode=True).decode('utf-8', errors='ignore')
+        else:
+            text = msg.get_payload(decode=True).decode('utf-8', errors='ignore')
+        
+        return text
+    except Exception as e:
+        logger.error("Failed to extract text from EML: %s", e)
         raise
 
 # Function to merge duplicate entries
@@ -240,6 +262,8 @@ def classify_file(file):
             file_type = "pdf"
         elif file_type == "text/plain":
             file_type = "email"
+        elif file_type == "message/rfc822" or filename.lower().endswith('.eml'):
+            file_type = "eml"
         else:
             raise ValueError(f"Unsupported file type: {file_type}")
 
@@ -251,8 +275,10 @@ def classify_file(file):
         elif file_type == "email":
             # For emails, assume the file contains the email body as plain text
             text = file.read().decode("utf-8")
+        elif file_type == "eml":
+            text = extract_text_from_eml(file)
         else:
-            raise ValueError("Unsupported file type. Use 'docx', 'pdf', or 'email'.")
+            raise ValueError("Unsupported file type. Use 'docx', 'pdf', 'email', or 'eml'.")
 
         # Normalize the content
         text = normalize_content(text)
@@ -311,7 +337,7 @@ def classify():
 @app.route("/bulk_classify", methods=["POST"])
 def bulk_classify():
     """
-    Endpoint to classify multiple files (PDFs, DOCXs, or emails) in bulk.
+    Endpoint to classify multiple files (PDFs, DOCXs, emails, or EMLs) in bulk.
     """
     if "files" not in request.files:
         return jsonify({"error": "No files uploaded"}), 400
