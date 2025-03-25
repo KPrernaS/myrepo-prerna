@@ -1,0 +1,9 @@
+flask==2.3.2
+flasgger==0.9.5
+python-docx==0.8.11
+pdfminer.six==20221105
+pymongo==4.3.3
+pyyaml==6.0
+openai==0.27.8
+python-dotenv==1.0.0
+concurrent-log-handler==0.9.20
