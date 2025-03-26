@@ -5,7 +5,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 class ConfigManager:
-    def __init__(self, config_path="path_to_config/config.yml"):
+    def __init__(self, config_path="config.yml"):
         self.config_path = config_path
         self.config = None
         self.request_types = None
